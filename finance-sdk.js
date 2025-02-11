@@ -111,6 +111,13 @@
         throw new Error(`Iframe with id "${currentConfig.iframeId}" not found`);
       }
 
+      // Set iframe src with UTM parameters
+      const params = new URLSearchParams({
+        dealerId: currentConfig.dealerId,
+        ...getAllUtmParams(),
+      });
+      iframe.src = `${currentConfig.baseUrl}/?${params.toString()}`;
+
       // Set up message listener
       window.addEventListener("message", handleMessage);
 

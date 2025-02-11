@@ -1,125 +1,124 @@
-# Finance SDK
+# Finance Calculator SDK Integration Guide
 
-A lightweight JavaScript/TypeScript SDK for integrating finance calculator functionality into dealer websites.
+## Overview
 
-## Installation
+The Auto Fintech Finance Calculator SDK provides a simple way to integrate vehicle finance calculations into third-party dealer websites. The SDK offers:
 
-### Using CDN
-
-Add the following script tag to your HTML:
-
-```html
-<script src="https://raw.githubusercontent.com/autofintechuk/finance-sdk/main/index.ts"></script>
-```
-
-Or import directly in your TypeScript file:
-
-```typescript
-import FinanceSDK from 'https://raw.githubusercontent.com/autofintechuk/finance-sdk/main/index.ts'
-```
+- Easy integration with minimal code required
+- Automatic UTM parameter tracking
+- Payment data storage with dealer validation
+- Bulk payment data retrieval via API
 
 ## Quick Start
 
-```typescript
-// Initialize the SDK
-FinanceSDK.init({
-  iframeId: "finance-calculator", // ID of the iframe element
-  dealer: "YOUR_DEALER_ID",      // Your unique dealer identifier
-  onPaymentUpdate: (data) => {   // Optional callback for payment updates
-    console.log(`Monthly Payment for ${data.vrm}: ${data.monthlyPayment}`);
-  },
+### 1. Add the SDK Script
+
+```html
+<script src="https://raw.githubusercontent.com/autofintechuk/finance-sdk/main/finance-sdk.js"></script>
+```
+
+### 2. Create Required HTML Element
+
+```html
+<iframe 
+    id="finance-calculator"
+    loading="eager"
+    style="width: 100%; height: 800px; border: none;"
+></iframe>
+```
+
+### 3. Initialize the Calculator
+
+```javascript
+const calculator = createFinanceCalculator({
+    iframeId: 'finance-calculator',
+    dealerId: 'YOUR_DEALER_ID',
+    apiKey: 'YOUR_API_KEY', // Required for fetchDealerPayments
+    onPaymentUpdate: (data) => {
+        console.log('Payment updated:', data);
+    }
 });
 ```
 
-## API Reference
+## Configuration Options
 
-### `init(options)`
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `dealerId` | string | Yes | Your Auto Fintech dealer ID |
+| `iframeId` | string | Yes | ID of the calculator iframe element |
+| `apiKey` | string | No | API key for accessing dealer payments |
+| `onPaymentUpdate` | function | No | Callback for payment updates |
+| `baseUrl` | string | No | Override default calculator URL |
+| `storagePrefix` | string | No | Prefix for localStorage keys (default: 'finance_sdk_') |
 
-Initializes the Finance SDK with the required configuration.
+## Integration Methods
 
-#### Parameters
+### 1. Full SDK Integration
+- Complete SDK with all features
+- Payment data storage
+- UTM parameter tracking
+- Bulk payment data access
 
-- `options` (Object):
-  - `iframeId` (string): The ID of the iframe element where the calculator will be embedded
-  - `dealer` (string): Your unique dealer identifier
-  - `onPaymentUpdate` (function, optional): Callback function that receives payment data updates
+### 2. Standalone Calculator
+- Simple iframe implementation
+- No additional features required
+- Minimal setup needed
 
-#### Example
+## Payment Data Storage
 
-```typescript
-FinanceSDK.init({
-  iframeId: "finance-calculator",
-  dealer: "12345",
-  onPaymentUpdate: (data) => {
-    console.log(data.vrm);         // Vehicle registration number
-    console.log(data.monthlyPayment); // Monthly payment amount
-  },
-});
+The SDK stores payment data in localStorage:
+
+```javascript
+// Get stored payment data
+const paymentData = calculator.getStoredPayment('ML69EDO');
 ```
 
-### `getPayment(vrm)`
+Storage features:
+- Dealer-specific validation
+- Automatic cleanup when dealer ID changes
 
-Retrieves stored payment information for a specific vehicle.
+## Bulk Payment Data Access
 
-#### Parameters
+Fetch all finance payments for your dealership in CSV format:
 
-- `vrm` (string): Vehicle registration number
-
-#### Returns
-
-- Payment data object or null if not found
-
-#### Example
-
-```typescript
-const paymentData = FinanceSDK.getPayment("AB12CDE");
-if (paymentData) {
-  console.log(paymentData.monthlyPayment);
+```javascript
+try {
+    const csvData = await calculator.fetchDealerPayments();
+    console.log('Finance payments:', csvData);
+} catch (error) {
+    console.error('Failed to fetch payments:', error);
 }
 ```
 
-### `generateEmbedURL(vrm, utmParams?)`
-
-Generates the URL for embedding the finance calculator.
-
-#### Parameters
-
-- `vrm` (string): Vehicle registration number
-- `utmParams` (object, optional): UTM parameters for tracking
-
-#### Returns
-
-- URL string for the finance calculator
-
-#### Example
-
-```typescript
-const url = FinanceSDK.generateEmbedURL("AB12CDE", {
-  utm_source: "dealer_website",
-  utm_medium: "widget"
-});
+The CSV data includes:
+```csv
+VRM,Monthly Payment,Deposit,APR
+ML69EDO,299.99,1000,6.9
 ```
 
-## Error Handling
+Requirements:
+- Valid API key must be provided during initialization
+- Dealer ID must match the authenticated dealer
 
-The SDK includes built-in error handling and will log errors to the console. Common errors include:
+## UTM Parameter Handling
 
-- "FinanceSDK: Iframe not found" - The specified iframe element doesn't exist
-- "FinanceSDK: Invalid data received" - Received malformed data from the calculator
-- "FinanceSDK: No payment data found" - No stored payment data for the specified VRM
-- "FinanceSDK: Dealer ID is missing" - SDK not properly initialized with dealer ID
+Automatically captures and forwards UTM parameters from:
+- URL parameters
+- localStorage (for returning visitors)
 
-## Data Storage
-
-The SDK uses localStorage to cache payment information for quick retrieval. Data is stored using the VRM as the key.
+Supported parameters:
+- utm_source
+- utm_medium
+- utm_campaign
+- utm_content
+- utm_term
+- utm_id
+- fbclid
+- gclid
 
 ## Security
 
-The SDK communicates with the finance calculator through a secure iframe using the postMessage API. All data is validated before processing.
-
-## Browser Support
-
-The SDK is compatible with all modern browsers that support:
-- localStorage
-- postMessage API
-- iframe embedding
+- Dealer authentication via dealerId
+- Origin validation for iframe communication
+- Dealer-specific data storage
+- API key authentication for bulk data access

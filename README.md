@@ -14,7 +14,7 @@ The Auto Fintech Finance Calculator SDK provides a simple way to integrate vehic
 ### 1. Add the SDK Script
 
 ```html
-<script src="https://raw.githubusercontent.com/autofintechuk/finance-sdk/main/finance-sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/autofintechuk/finance-sdk/finance-sdk.js"></script>
 ```
 
 ### 2. Create Required HTML Element
